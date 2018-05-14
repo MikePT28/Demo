@@ -16,7 +16,7 @@ class Session {
 
   emptySession() { current = null; }
 
-  isEmpty() => current != null;
+  isEmpty() => current == null;
 
   static Future<bool> loadStoredSession() async {
 

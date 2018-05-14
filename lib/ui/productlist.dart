@@ -60,12 +60,12 @@ class ProductListState extends State<StatefulWidget> implements LoginInteractorD
   }
 
   reload() async {
-    _loginInteractor.doLogin(username: "ixxgznle@sharklasers.com", password: "password");
-//    setState(() {
-//      _products = [];
-//      loaded = false;
-//    });
-//    load();
+//    _loginInteractor.doLogin(username: "ixxgznle@sharklasers.com", password: "password");
+    setState(() {
+      _products = [];
+      loaded = false;
+    });
+    load();
   }
 
   showFilters() {
