@@ -1,33 +1,51 @@
 //Flutter libs
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:flutter/services.dart';
 
 import '../dataproviders/getpromotions.dart';
 import '../dataproviders/generatetoken.dart';
 import '../dataproviders/createcoupons.dart';
 import '../models/product.dart';
+import '../models/user.dart';
+import '../interactors/logininteractor.dart';
 //Project libs
 //Providers
 
 
-class ProductList extends StatefulWidget {
-
+class ProductList extends StatefulWidget{
 
   @override
   State createState() => new ProductListState();
+
 }
 
-class ProductListState extends State<StatefulWidget> {
+class ProductListState extends State<StatefulWidget> implements LoginInteractorDelegate {
   GetPromotions _promoProvider = GetPromotions();
   GenerateToken _tokenProvider = GenerateToken();
   CreateCoupon _couponCreator = CreateCoupon();
+  LoginInteractor _loginInteractor;
 
-  List<Product> _products;
+  List<Product> _products = List();
   bool loaded = false;
+
+  @override
+  loginError(String message) {
+    print(message);
+
+  }
+
+  @override
+  loginSuccess(User user) {
+    print(user.name);
+
+  }
 
   @override
   void initState(){
     super.initState();
+    _loginInteractor = LoginInteractor(delegate: this);
     load();
   }
 
@@ -41,11 +59,13 @@ class ProductListState extends State<StatefulWidget> {
     });
   }
 
-  reload() {
-    setState(() {
-      loaded = false;
-    });
-    load();
+  reload() async {
+    _loginInteractor.doLogin(username: "ixxgznle@sharklasers.com", password: "password");
+//    setState(() {
+//      _products = [];
+//      loaded = false;
+//    });
+//    load();
   }
 
   showFilters() {
@@ -54,8 +74,9 @@ class ProductListState extends State<StatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    var view = new Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: new Text("dCoupon"),
           actions: <Widget>[
             IconButton(onPressed: showFilters, icon: Icon(Icons.filter_list),),
@@ -66,8 +87,21 @@ class ProductListState extends State<StatefulWidget> {
         backgroundColor: Color(0xFFF4F4F4),
         body: new Container(
             margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-            child: loaded ? new ListView.builder(itemBuilder: _itemBuilder, itemCount: _products.length,) : Center(child: CircularProgressIndicator(),)
+            child: Stack(
+              children: <Widget>[
+                new ListView.builder(itemBuilder: _itemBuilder, itemCount: _products.length,),
+                loaded ? Container() : Center(child: CircularProgressIndicator(),)
+              ],
+            )
         )
+    );
+
+    return WillPopScope(
+      onWillPop: () async {
+        SystemNavigator.pop();
+        return false;
+      },
+      child: view,
     );
   }
 
@@ -76,59 +110,6 @@ class ProductListState extends State<StatefulWidget> {
     if (_products == null || _products.length == 0 || _products.length < index) return null;
 
     var product = _products[index];
-
-//    return Container(
-//        margin: new EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 0.0),
-//        child: Column(
-//          children: <Widget>[
-//            Stack(
-//              children: <Widget>[
-//                Column(
-//                  children: <Widget>[
-//                    SizedBox(height: 20.0,),
-//                    Card(
-//                      elevation: 0.0,
-//                      child:
-//                      Center(
-//                        child: Container(
-//                          margin: new EdgeInsets.fromLTRB(120.0, 12.0, 36.0, 12.0),
-//                          constraints: BoxConstraints(minHeight: 100.0),
-//                          child:titleText(product.title),
-//                        ),
-//                      ),
-//                    ),
-//                  ],
-//                ),
-//                Positioned(
-//                  top: 0.0,
-//                  left: 0.0,
-//                  child: imageView(product.imageSrc),
-//                ),
-//                Positioned(
-//                  top: 80.0,
-//                  left: 5.0,
-//                  child: discountTag(product.discount),
-//                ),
-//                Positioned(
-//                    right: 0.0,
-//                    bottom: 0.0,
-//                    child: FloatingActionButton(
-//                      backgroundColor: product.added ? Colors.red : Colors.green,
-//                        elevation: 3.0,
-//                        onPressed: (){
-//                          setState(() {
-//                            product.added = !product.added;
-//                          });
-//                        },
-//                        child: product.added ? Icon(Icons.remove) : Icon(Icons.add)
-//                    )
-//                ),
-//              ],
-//            ),
-//
-//          ],
-//        )
-//    );
 
     return Container(
         margin: new EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 0.0),
