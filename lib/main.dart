@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import './ui/loginscreen.dart';
 import './ui/productlist.dart';
 import 'models/session.dart';
-import 'dart:async';
+import 'ui/mycouponsscreen.dart';
 
 void main() => runApp(new App());
 
@@ -36,7 +36,7 @@ class _App extends State<StatefulWidget> {
             offstage: index != 1,
             child: new TickerMode(
               enabled: index == 1,
-              child: new MaterialApp(theme: _themeData,home: new Container(color: Colors.black,)),
+              child: new MaterialApp(theme: _themeData,home: _myCoupons()),
             ),
           ),
         ],
@@ -50,7 +50,7 @@ class _App extends State<StatefulWidget> {
             title: new Text("Coupons", style: TextStyle(color: (index == 0 ? Colors.deepOrange: null))),
           ),
           new BottomNavigationBarItem(
-            icon: new Icon(Icons.account_balance_wallet, color: (index == 0 ? null : Colors.deepOrange),),
+            icon: new Icon(const IconData(0xe902, fontFamily: 'Icons'), color: (index == 0 ? null : Colors.deepOrange),),
             title: new Text("My Coupons", style: TextStyle(color: (index == 0 ? null : Colors.deepOrange)),),
 
           ),
@@ -91,5 +91,10 @@ class _App extends State<StatefulWidget> {
       _loading = false;
     });
   }
+
+  Widget _myCoupons() {
+    return MyCouponsScreen();
+  }
+
 }
 

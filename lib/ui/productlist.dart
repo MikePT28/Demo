@@ -9,6 +9,8 @@ import '../dataproviders/createcoupons.dart';
 import '../dataproviders/getusercoupons.dart';
 import '../models/product.dart';
 
+import 'productcard.dart';
+
 class ProductList extends StatefulWidget{
 
   @override
@@ -63,25 +65,23 @@ class ProductListState extends State<StatefulWidget>{
     load();
   }
 
-  addProduct(Product product) async  {
+  addProduct(ProductCard card) async  {
 
-    setState(() {
-      product.added = true;
-    });
 
-    List<CouponResponse> coupons = await _couponCreator.createCoupon([product.id]);
+    card.isAdding(true);
 
+    List<CouponResponse> coupons = await _couponCreator.createCoupon([card.id]);
     if (coupons.length == 0) {
-      setState(() {
-        product.added = false;
-      });
+      card.isAdding(false);
       return;
     };
 
+    _products.removeWhere((_product) {
+      return _product.id == card.id;
+    });
+    card.isAdding(false);
     setState(() {
-      _products.removeWhere((_product) {
-        return _product.id == product.id;
-      });
+      _products = _products;
     });
 
   }
@@ -132,6 +132,9 @@ class ProductListState extends State<StatefulWidget>{
 
     var product = _products[index];
 
+    return ProductCard(product.id, product.title, product.discount, product.imageSrc, (card){
+      addProduct(card);
+    });
     return Container(
         margin: new EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 0.0),
         child: Card(
@@ -159,7 +162,7 @@ class ProductListState extends State<StatefulWidget>{
                     IconButton(
                       icon: product.added ? CircularProgressIndicator() : Icon(Icons.add),
                       onPressed: () {
-                        addProduct(product);
+//                        addProduct(product);
                       },
                     ),
                   ],
@@ -198,6 +201,7 @@ class ProductListState extends State<StatefulWidget>{
 
     return tag;
   }
+
 
   Widget imageView(String imageURL) {
 
