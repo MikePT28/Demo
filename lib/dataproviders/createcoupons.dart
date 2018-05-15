@@ -7,6 +7,7 @@ import 'package:xml/xml.dart' as xml;
 
 //Project libs
 import '../models/product.dart' show CouponResponse;
+import '../models/session.dart';
 
 class CreateCoupon {
 
@@ -27,8 +28,13 @@ class CreateCoupon {
 
     String url = "https://es.dcoupon.eu/market/createMultipleCoupons";
 
+//    String body = "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwYzQ1ZjZjOC1kOTdjLTRkMGEtYWQ4Ni1lZDk1NGM3YjE5ODMiLCJpc3MiOiJkY291cG9uLmNvbSIsImlhdCI6MTUyNjE1MDI4MCwiZXhwIjoxNTU3Njg2MjgwLCJzdWIiOiIxODc3NSIsImVtYWlsIjoiYnBkbWZuc3FAc2hhcmtsYXNlcnMuY29tIiwiYWxpYXMiOiJOb21icmUiLCJyZWd0eXAiOiJlbWFpbCJ9.Av2RBfAtqLCBrchGMqiSfPi8BVF0JK5Dwv1APAvfakg&metaCouponTokens=$ids&apiTokenPublisher=8u3kk3mp66cdomfr6qcu&creationLatitude=&creationLongitude=";
+
+    String jwt = Session.shared.current.apiKey;
+    String body = "jwt=$jwt&metaCouponTokens=$ids&apiTokenPublisher=8u3kk3mp66cdomfr6qcu&creationLatitude=&creationLongitude=";
+
     http.Response response = await http.post(url, headers: {"Content-Type":"application/x-www-form-urlencoded"},
-        body: "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwYzQ1ZjZjOC1kOTdjLTRkMGEtYWQ4Ni1lZDk1NGM3YjE5ODMiLCJpc3MiOiJkY291cG9uLmNvbSIsImlhdCI6MTUyNjE1MDI4MCwiZXhwIjoxNTU3Njg2MjgwLCJzdWIiOiIxODc3NSIsImVtYWlsIjoiYnBkbWZuc3FAc2hhcmtsYXNlcnMuY29tIiwiYWxpYXMiOiJOb21icmUiLCJyZWd0eXAiOiJlbWFpbCJ9.Av2RBfAtqLCBrchGMqiSfPi8BVF0JK5Dwv1APAvfakg&metaCouponTokens=$ids&apiTokenPublisher=8u3kk3mp66cdomfr6qcu&creationLatitude=&creationLongitude=");
+        body: body);
     var responseXML = xml.parse(response.body);
     List<CouponResponse> coupons = [];
     responseXML.findAllElements("ns2:createMultipleCouponResponse").toList().forEach( (xml) {

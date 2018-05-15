@@ -1,18 +1,13 @@
 //Flutter libs
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:flutter/services.dart';
 
 import '../dataproviders/getpromotions.dart';
 import '../dataproviders/generatetoken.dart';
 import '../dataproviders/createcoupons.dart';
+import '../dataproviders/getusercoupons.dart';
 import '../models/product.dart';
-import '../models/user.dart';
-import '../interactors/logininteractor.dart';
-//Project libs
-//Providers
-
 
 class ProductList extends StatefulWidget{
 
@@ -21,55 +16,79 @@ class ProductList extends StatefulWidget{
 
 }
 
-class ProductListState extends State<StatefulWidget> implements LoginInteractorDelegate {
+class ProductListState extends State<StatefulWidget>{
   GetPromotions _promoProvider = GetPromotions();
   GenerateToken _tokenProvider = GenerateToken();
   CreateCoupon _couponCreator = CreateCoupon();
-  LoginInteractor _loginInteractor;
+  GetUserCoupons _getCouponsProvider = GetUserCoupons();
 
   List<Product> _products = List();
+  List<Coupon> _userCoupons = List();
+
   bool loaded = false;
-
-  @override
-  loginError(String message) {
-    print(message);
-
-  }
-
-  @override
-  loginSuccess(User user) {
-    print(user.name);
-
-  }
 
   @override
   void initState(){
     super.initState();
-    _loginInteractor = LoginInteractor(delegate: this);
+
     load();
   }
 
   load() async {
 
     _products = await _promoProvider.getPromotions();
+    _userCoupons = await _getCouponsProvider.getCoupons();
 
     if (_products.length == 0) { return; }
+
+    if (_userCoupons.length > 0) {
+      _userCoupons.forEach((coupon){
+        _products.removeWhere((product) {
+          return product.title == coupon.name;
+        });
+      });
+    }
+
     setState(() {
       loaded = true;
     });
   }
 
   reload() async {
-//    _loginInteractor.doLogin(username: "ixxgznle@sharklasers.com", password: "password");
     setState(() {
       _products = [];
+      _userCoupons = [];
       loaded = false;
     });
     load();
   }
 
-  showFilters() {
+  addProduct(Product product) async  {
 
+    setState(() {
+      product.added = true;
+    });
+
+    List<CouponResponse> coupons = await _couponCreator.createCoupon([product.id]);
+
+    if (coupons.length == 0) {
+      setState(() {
+        product.added = false;
+      });
+      return;
+    };
+
+    setState(() {
+      _products.removeWhere((_product) {
+        return _product.id == product.id;
+      });
+    });
+
+  }
+
+  showFilters() async {
+    var list = await _getCouponsProvider.getCoupons();
+    list.forEach((coupon) => print(coupon.id) );
   }
 
   @override
@@ -95,6 +114,8 @@ class ProductListState extends State<StatefulWidget> implements LoginInteractorD
             )
         )
     );
+
+
 
     return WillPopScope(
       onWillPop: () async {
@@ -136,18 +157,9 @@ class ProductListState extends State<StatefulWidget> implements LoginInteractorD
                       margin: new EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),),
                     ),
                     IconButton(
-                      icon: product.added ? Icon(Icons.remove) : Icon(Icons.add),
-                      onPressed: () async {
-                        List<CouponResponse> coupons = await _couponCreator.createCoupon([product.id]);
-                        coupons.forEach( (coupon) {
-                          _products.forEach((product){
-                            if (product.id == coupon.productID){
-                              setState(() {
-                                product.added = coupon.added;
-                              });
-                            }
-                          });
-                        });
+                      icon: product.added ? CircularProgressIndicator() : Icon(Icons.add),
+                      onPressed: () {
+                        addProduct(product);
                       },
                     ),
                   ],
