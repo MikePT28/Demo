@@ -14,6 +14,53 @@ class App extends StatefulWidget {
 }
 
 class _App extends State<StatefulWidget> {
+  final _themeData = ThemeData(primarySwatch: Colors.deepOrange,
+    bottomAppBarColor: Colors.deepOrange,
+
+  );
+
+  int index = 0;
+
+  Widget main() {
+    var app = new Scaffold(
+      body: new Stack(
+        children: <Widget>[
+          new Offstage(
+            offstage: index != 0,
+            child: new TickerMode(
+              enabled: index == 0,
+              child: new MaterialApp(theme: _themeData,home: new ProductList()),
+            ),
+          ),
+          new Offstage(
+            offstage: index != 1,
+            child: new TickerMode(
+              enabled: index == 1,
+              child: new MaterialApp(theme: _themeData,home: new Container(color: Colors.black,)),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: new BottomNavigationBar(
+        currentIndex: index,
+        onTap: (int index) { setState((){ this.index = index; }); },
+        items: <BottomNavigationBarItem>[
+          new BottomNavigationBarItem(
+            icon: new Icon(Icons.home, color: (index == 0 ? Colors.deepOrange : null),),
+            title: new Text("Coupons", style: TextStyle(color: (index == 0 ? Colors.deepOrange: null))),
+          ),
+          new BottomNavigationBarItem(
+            icon: new Icon(Icons.account_balance_wallet, color: (index == 0 ? null : Colors.deepOrange),),
+            title: new Text("My Coupons", style: TextStyle(color: (index == 0 ? null : Colors.deepOrange)),),
+
+          ),
+        ],
+      ),
+    );
+
+    return MaterialApp(home: app,);
+  }
+
   bool _loading = true;
 
   @override
@@ -26,15 +73,15 @@ class _App extends State<StatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Demo',
-      theme: new ThemeData(primarySwatch: Colors.deepOrange,),
+      title: 'dCoupon',
+      theme: _themeData,
       home: home(),
     );
   }
 
   Widget home() {
 
-    return _loading ? Scaffold() : Session.shared.isEmpty() ? LoginScreen() : ProductList();
+    return _loading ? Scaffold() : Session.shared.isEmpty() ? LoginScreen() : main();//ProductList();
 
   }
 
