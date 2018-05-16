@@ -28,6 +28,7 @@ class GetUserCoupons {
     responseJSON.forEach((json) {
       coupons.add(new Coupon.fromJSON(json));
     });
+
     return coupons;
   }
 

@@ -14,7 +14,21 @@ class Session {
 
   User getCurrent() => this.current;
 
-  emptySession() { current = null; }
+  Future<bool> emptySession() async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String apiKey = await prefs.get("localKey");
+
+    if (apiKey == null || apiKey.isEmpty || apiKey.length == 0) {
+      return true;
+    }
+
+    await prefs.remove("localKey");
+
+    current = null;
+
+    return true;
+  }
 
   isEmpty() => current == null;
 

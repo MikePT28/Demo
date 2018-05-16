@@ -21,7 +21,7 @@ class LoginInteractor {
   doLogin({String username, String password}) async {
     var response = await _provider.doLogin(username: username, password: password);
     if (response is LoginError) {
-      LoginError error = response as LoginError;
+      LoginError error = response;
       delegate.loginError(error.errrorMessage);
     }
     else {
@@ -30,7 +30,7 @@ class LoginInteractor {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString("localKey" , success.user.apiKey);
-
+      await Session.loadStoredSession();
       delegate.loginSuccess(success.user);
     }
   }

@@ -1,0 +1,6 @@
+These are the keys to use the icons on the `icon.ttf`:
+
+- Smartphone: e900
+- Coupon: e901
+- Discount: e902
+- QRCode: e903

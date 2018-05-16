@@ -4,23 +4,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../dataproviders/getpromotions.dart';
-import '../dataproviders/generatetoken.dart';
 import '../dataproviders/createcoupons.dart';
 import '../dataproviders/getusercoupons.dart';
 import '../models/product.dart';
+import '../models/session.dart';
 
 import 'productcard.dart';
 
-class ProductList extends StatefulWidget{
+import 'interfaces/ipage.dart';
+
+import 'package:demo/main.dart';
+
+class ProductList extends StatefulWidget {
+  final InterScreenNotifications notification;
+
+  ProductList({this.notification});
 
   @override
-  State createState() => new ProductListState();
+  State createState() {
+    return ProductListState(notifications: notification);
+  }
 
 }
 
-class ProductListState extends State<StatefulWidget>{
+class ProductListState extends State<StatefulWidget> {
+  final InterScreenNotifications notifications;
+
+  ProductListState({this.notifications});
+
   GetPromotions _promoProvider = GetPromotions();
-  GenerateToken _tokenProvider = GenerateToken();
   CreateCoupon _couponCreator = CreateCoupon();
   GetUserCoupons _getCouponsProvider = GetUserCoupons();
 
@@ -65,30 +77,28 @@ class ProductListState extends State<StatefulWidget>{
     load();
   }
 
-  addProduct(ProductCard card) async  {
-
-
-    card.isAdding(true);
+  addProduct(ProductCardState card) async  {
+    card.setAdding(true);
 
     List<CouponResponse> coupons = await _couponCreator.createCoupon([card.id]);
     if (coupons.length == 0) {
-      card.isAdding(false);
+      card.setAdding(false);
       return;
-    };
+    }
 
+    card.setAdding(false);
     _products.removeWhere((_product) {
       return _product.id == card.id;
     });
-    card.isAdding(false);
+    notifications.notifyDataChange(0);
     setState(() {
-      _products = _products;
     });
-
   }
 
   showFilters() async {
-    var list = await _getCouponsProvider.getCoupons();
-    list.forEach((coupon) => print(coupon.id) );
+//    var list = await _getCouponsProvider.getCoupons();
+//    list.forEach((coupon) => print(coupon.id) );
+    _logout();
   }
 
   @override
@@ -108,22 +118,20 @@ class ProductListState extends State<StatefulWidget>{
             margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
             child: Stack(
               children: <Widget>[
-                new ListView.builder(itemBuilder: _itemBuilder, itemCount: _products.length,),
+                _list(),
                 loaded ? Container() : Center(child: CircularProgressIndicator(),)
               ],
             )
         )
     );
 
+    return view;
 
+  }
 
-    return WillPopScope(
-      onWillPop: () async {
-        SystemNavigator.pop();
-        return false;
-      },
-      child: view,
-    );
+  Widget _list() {
+    return new ListView.builder(itemBuilder: _itemBuilder, itemCount: _products.length, );
+
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
@@ -135,46 +143,6 @@ class ProductListState extends State<StatefulWidget>{
     return ProductCard(product.id, product.title, product.discount, product.imageSrc, (card){
       addProduct(card);
     });
-    return Container(
-        margin: new EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 0.0),
-        child: Card(
-          child: Container(
-              margin: new EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 8.0),
-              child: Column(
-                children: <Widget>[
-                  Row(children: <Widget>[
-                    Stack(
-                      children: <Widget>[
-                        imageView(_products[index].imageSrc),
-                        Positioned(
-                          top: 66.0,
-                          child: discountTag(product.discount),
-                        ),
-                      ],
-                    ),
-                    Expanded(child: Container(child: Column(
-                      children: <Widget>[
-                        titleText(_products[index].title)
-                      ],
-                    ),
-                      margin: new EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),),
-                    ),
-                    IconButton(
-                      icon: product.added ? CircularProgressIndicator() : Icon(Icons.add),
-                      onPressed: () {
-//                        addProduct(product);
-                      },
-                    ),
-                  ],
-                  ),
-                ],
-              )
-          ),
-        )
-    );
-
-
-
   }
 
 
@@ -216,45 +184,16 @@ class ProductListState extends State<StatefulWidget>{
 
     return box;
 
-//    var image = CircleAvatar(
-//      backgroundColor: Colors.white,
-//      child: OverflowBox(
-//        maxHeight: 70.0,
-//        maxWidth: 70.0,
-////        margin: new EdgeInsets.all(4.0),
-//        child: new Image.network(imageURL),
-//      ),
-//      radius: 50.0,
-//    );
-//
-//
-//    return Card(
-//      elevation: 0.0,
-//      shape: new CircleBorder(),
-//      child: image ,
-//    );
   }
 
-//  Future<List<Category>> getJSON() async {
-//
-//    String url = "https://es.dcoupon.eu/market/getAvailableCategories";
-//
-//    http.Response response = await http.post(url, headers: {"Content-Type":"application/x-www-form-urlencoded"}, body: "apiToken=8u3kk3mp66cdomfr6qcu&datetime=&country=ES&signatureValue=&lang=es");
-////    document.body.nodes.first.nodes[0].attributes["title"]
-//    List<Category> items = new List();
-//    dom.Document document = parse(response.body);
-//    document.body.nodes.forEach((e) {
-//      if (e.nodes.length > 0) {
-//        String name = e.nodes.first.attributes["title"];
-//        String value = e.nodes.first.attributes["value"];
-//        if (name.isNotEmpty && value.isNotEmpty) {
-//          items.add(Category(name, value));
-//        }
-//      }
-//    });
-//
-//    return items;
-////    return JsonDecoder().convert(response.body);
-//  }
+
+  _logout() async {
+    bool loggedOut = await Session.shared.emptySession();
+
+    if (!loggedOut) return;
+
+    main();
+
+  }
 
 }

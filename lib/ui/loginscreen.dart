@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import '../interactors/logininteractor.dart';
 import '../models/user.dart';
 
-import 'productlist.dart';
+import 'appcontainer.dart';
 
 class LoginScreen extends StatefulWidget {
+  final Function loggedInCallback;
+
+  LoginScreen({this.loggedInCallback});
 
   @override
   State<StatefulWidget> createState() {
-    return LoginScreenState();
+    return LoginScreenState(loggedInCallback: loggedInCallback);
   }
 }
 
 class LoginScreenState extends State<StatefulWidget> implements LoginInteractorDelegate {
   LoginInteractor _loginInteractor;
+  Function loggedInCallback;
 
   bool _performinLoginAction = false;
 
@@ -22,9 +26,11 @@ class LoginScreenState extends State<StatefulWidget> implements LoginInteractorD
 
   String _errorMessage = "";
 
+  LoginScreenState({this.loggedInCallback});
+
   doLogin() {
-    _usernameController.text = "ixxgznle@sharklasers.com";
-    _passwordController.text = "password";
+//    _usernameController.text = "egrodmde@sharklasers.com";
+//    _passwordController.text = "password";
     //Validate
     if (_usernameController.text.isEmpty && _passwordController.text.isEmpty) {
       return;
@@ -53,8 +59,11 @@ class LoginScreenState extends State<StatefulWidget> implements LoginInteractorD
 
   @override
   loginSuccess(User user) {
-    _performinLoginAction = false;
-    Navigator.push(context, MaterialPageRoute(builder: (context) => ProductList()));
+    setState(() {
+      _performinLoginAction = false;
+    });
+//    loggedInCallback(user != null);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => AppContainer()));
   }
 
   @override

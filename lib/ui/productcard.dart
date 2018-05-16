@@ -2,35 +2,37 @@ import 'package:flutter/material.dart';
 
 class ProductCard extends StatefulWidget {
 
+  final String _title;
+  final String _discount;
+  final String _imageURL;
+  final String id;
+  final Function _action;
+
+  ProductCard(this.id, this._title, this._discount, this._imageURL, [this._action]);
+
+
+  @override
+  State<StatefulWidget> createState() {
+    return ProductCardState(this.id, this._title, this._discount, this._imageURL, this._action);
+  }
+
+
+}
+
+class ProductCardState extends State<ProductCard> {
   String _title;
   String _discount;
   String _imageURL;
   String id;
   Function _action;
 
-  ProductCard(this.id, this._title, this._discount, this._imageURL, [this._action]);
+  ProductCardState(this.id, this._title, this._discount, this._imageURL, [this._action]);
 
-  var _state;
-  @override
-  State<StatefulWidget> createState() {
-    _state = _ProductCard();
-    return _state;
-  }
-
-  isAdding(bool adding) {
-    _state.setAdding(adding);
-  }
-
-
-}
-
-class _ProductCard extends State<ProductCard> {
-
-  bool _adding = false;
+  bool adding = false;
 
   setAdding(bool adding) {
     setState(() {
-      _adding = adding;
+      this.adding = adding;
     });
   }
 
@@ -53,16 +55,16 @@ class _ProductCard extends State<ProductCard> {
                   Row(children: <Widget>[
                     Stack(
                       children: <Widget>[
-                        imageView(widget._imageURL),
+                        imageView(_imageURL),
                         Positioned(
                           top: 66.0,
-                          child: discountTag(widget._discount),
+                          child: discountTag(_discount),
                         ),
                       ],
                     ),
                     Expanded(child: Container(child: Column(
                       children: <Widget>[
-                        titleText(widget._title)
+                        titleText(_title)
                       ],
                     ),
                       margin: new EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),),
@@ -80,9 +82,9 @@ class _ProductCard extends State<ProductCard> {
 
   bool _switchState = true;
   Widget actionButton() {
-    if (widget._action == null) return Container();
+    if (_action == null) return Container();
 
-    if (widget._discount == null) {
+    if (_discount == null) {
       return Container(child: Switch(
         value: _switchState,
         onChanged: (newValue){
@@ -96,9 +98,10 @@ class _ProductCard extends State<ProductCard> {
     }
 
     return IconButton(
-      icon: _adding ? CircularProgressIndicator() : Icon(Icons.add),
+      icon: adding ? SizedBox(width: 30.0, height: 30.0, child: CircularProgressIndicator(),) : Icon(Icons.add),
       onPressed: () {
-        widget._action(widget);
+        if(adding) return;
+        _action(this);
       },
     );
   }

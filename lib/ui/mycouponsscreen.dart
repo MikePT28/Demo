@@ -8,19 +8,38 @@ import '../models/product.dart';
 
 import 'productcard.dart';
 
-class MyCouponsScreen extends StatefulWidget{
+import 'interfaces/ipage.dart';
+
+
+class MyCouponsScreen extends StatefulWidget implements IPage {
+
+  MyCouponsScreen();
+
+  final MyCouponsScreenState _state = MyCouponsScreenState();
+  @override
+  State createState() => _state;
 
   @override
-  State createState() => new MyCouponsScreenState();
+  void dataChanged() {
+    _state.dataChanged();
+  }
+
 
 }
 
-class MyCouponsScreenState extends State<MyCouponsScreen>{
+class MyCouponsScreenState extends State<MyCouponsScreen> implements IPage {
+
   GetUserCoupons _getCouponsProvider = GetUserCoupons();
 
   List<Coupon> _userCoupons = List();
 
   bool loaded = false;
+
+
+  @override
+  void dataChanged() {
+    reload();
+  }
 
   @override
   void initState(){
@@ -40,7 +59,7 @@ class MyCouponsScreenState extends State<MyCouponsScreen>{
     });
   }
 
-  reload() async {
+  reload() {
     setState(() {
       _userCoupons = [];
       loaded = false;

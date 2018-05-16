@@ -1,6 +1,6 @@
 class ValidateEmail {
 
-  String _url = "https://api.dcoupon.eu/id/validate";
+//  String _url = "https://api.dcoupon.eu/id/validate";
 
   Map<String, String> body = {"email":"eepsfevm@sharklasers.com","registrationType":"EMAIL"};
 
